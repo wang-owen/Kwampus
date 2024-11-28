@@ -15,7 +15,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
-COMMAND_PREFIX = "!kwampus "
+COMMAND_PREFIX = "!"
 bot = commands.Bot(COMMAND_PREFIX, intents=intents)
 
 
@@ -30,18 +30,54 @@ async def hello(ctx: commands.Context):
 
 
 @bot.command()
-async def join(ctx: commands.Context):
+async def ssjoin(ctx: commands.Context):
     """Join secret santa"""
-    member = ctx.message.author
+
     guild = ctx.guild
-    if guild:
-        role = guild.get_role(1311140822447558696)
+    if guild is None:
+        print("ERROR: Invalid guild")
+        return
+
+    role = discord.utils.get(guild.roles, name="Gifter")
+    if role is None:
+        print('"Gifter" role does not exist. Creating role...')
+        role = await guild.create_role(
+            name="Gifter", colour=discord.Colour.magenta(), mentionable=True
+        )
+
+    author = await guild.fetch_member(ctx.author.id)
+    if author is None:
+        print("ERROR: Invalid author")
+        return
+    try:
+        await author.add_roles(role)
+    except discord.Forbidden:
+        await ctx.send("I do not have permissions to manage roles!")
+    else:
+        await ctx.send(f'"Gifter" role given to {author.display_name}.')
 
 
 @bot.command()
-async def leave(ctx: commands.Context):
-    """Leave secret santa"""
-    pass
+async def ssleave(ctx: commands.Context):
+    """Join secret santa"""
+
+    guild = ctx.guild
+    if guild is None:
+        print("ERROR: Invalid guild")
+        return
+
+    role = discord.utils.get(guild.roles, name="Gifter")
+
+    author = await guild.fetch_member(ctx.author.id)
+    if author is None:
+        print("ERROR: Invalid author")
+        return
+    try:
+        await author.remove_roles(role)  # type: ignore
+    except discord.Forbidden:
+        await ctx.send("I do not have permissions to manage roles!")
+    else:
+        await ctx.send(f'"Gifter" role removed from {author.display_name}.')
 
 
 # Start bot
