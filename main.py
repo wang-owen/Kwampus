@@ -37,6 +37,11 @@ async def ping(ctx: commands.Context):
 
 
 @bot.command()
+async def pong(ctx: commands.Context):
+    await ctx.send("ping")
+
+
+@bot.command()
 async def join(ctx: commands.Context):
     """Join secret santa"""
 
@@ -187,6 +192,7 @@ async def list(ctx: commands.Context):
         message = "# :santa: Secret Santa List :scroll: \n"
         for santa in santas:
             message += f"* {santa.display_name} (*{santa.name}*)\n"
+        message += f"There are {len(santas)} secret santas!"
         await ctx.send(message)
     else:
         await ctx.send("There are no secret santas!")
@@ -208,11 +214,13 @@ async def generate(ctx: commands.Context):
     santas = get_santas(guild)
     if santas:
         shuffle(santas)
+        await ctx.send(":christmas_tree: Generating Secret Santas... :christmas_tree:")
         can_send = []
         cannot_send = []
         for i in range(len(santas)):
             dm = await bot.create_dm(santas[i])
             try:
+                await ctx.send(f"Generating Secret Santa for Santa {i + 1}...")
                 await dm.send(
                     ":christmas_tree: Generating Secret Santas... :christmas_tree:"
                 )
@@ -238,7 +246,9 @@ async def generate(ctx: commands.Context):
                 await dm.send(
                     f":christmas_tree: You are **{assigned_to.display_name}**'s (*{assigned_to.name}*) secret santa! :star:"
                 )
-            await ctx.send("Secret Santa generation complete! Check your DM's!")
+            await ctx.send(
+                "# :christmas_tree: Secret Santa generation complete! Check your DM's! :christmas_tree:"
+            )
     else:
         await ctx.send("There are no secret santas!")
 
